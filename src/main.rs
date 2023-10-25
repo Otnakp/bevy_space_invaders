@@ -1,7 +1,9 @@
 use bevy::prelude::*;
-use bevy::window::{PresentMode, PrimaryWindow, WindowMode, WindowResized};
+use bevy::window::{PresentMode, PrimaryWindow, WindowMode, WindowResized, WindowResolution};
+
 const SPRITE_SHIFT: f32 = 100.0;
 const SPRITE_SIZE: f32 = 100.0;
+const PLAYER_SPEED: f32 = 300.0;
 fn main() {
     App::new()
         .add_plugins(
@@ -10,8 +12,9 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Space invaders 2".into(),
-                        resizable: true,
-                        mode: WindowMode::BorderlessFullscreen,
+                        resizable: false, // put true if you put borderless
+                        mode: WindowMode::Windowed,
+                        resolution: WindowResolution::new(500.0, 900.0),
                         present_mode: PresentMode::Immediate,
                         ..default()
                     }),
@@ -20,7 +23,7 @@ fn main() {
                 .build(),
         )
         .add_systems(Startup, setup)
-        .add_systems(Update, (player_movement, on_resize_system))
+        .add_systems(Update, (player_movement, on_resize_system, check_borders))
         .run();
 }
 
@@ -51,10 +54,10 @@ fn player_movement(
 ) {
     for (mut transform, _) in &mut characters {
         if input.pressed(KeyCode::D) {
-            transform.translation.x += 200.0 * time.delta_seconds();
+            transform.translation.x += PLAYER_SPEED * time.delta_seconds();
         }
         if input.pressed(KeyCode::A) {
-            transform.translation.x -= 200.0 * time.delta_seconds();
+            transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
         }
     }
 }
@@ -69,5 +72,17 @@ fn on_resize_system(
         for mut transform in query.iter_mut() {
             transform.translation.y = -half_height + SPRITE_SHIFT;
         }
+    }
+}
+
+fn check_borders(mut query: Query<&mut Transform, &Sprite>, windows: Query<&Window>) {
+    let window = windows.single();
+    let width = window.resolution.width();
+    let mut transform = query.single_mut();
+    println!("{}", transform.translation.x);
+    if transform.translation.x > width / 2.0 {
+        transform.translation.x = width / 2.0;
+    } else if transform.translation.x < -width / 2.0 {
+        transform.translation.x = -width / 2.0;
     }
 }
