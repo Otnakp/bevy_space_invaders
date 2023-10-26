@@ -1,9 +1,10 @@
 use bevy::prelude::*;
-use bevy::window::{PresentMode, PrimaryWindow, WindowMode, WindowResized, WindowResolution};
+use bevy::window::{PresentMode, PrimaryWindow, WindowMode, WindowResolution};
 
-const SPRITE_SHIFT: f32 = 100.0;
-const SPRITE_SIZE: f32 = 100.0;
-const PLAYER_SPEED: f32 = 300.0;
+mod systems;
+use systems::constants::*;
+use systems::systems_impl::*;
+
 fn main() {
     App::new()
         .add_plugins(
@@ -45,44 +46,4 @@ fn setup(
         transform: Transform::from_xyz(0.0, -half_height + SPRITE_SHIFT, 0.0),
         ..default()
     });
-}
-
-fn player_movement(
-    mut characters: Query<(&mut Transform, &Sprite)>,
-    input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-) {
-    for (mut transform, _) in &mut characters {
-        if input.pressed(KeyCode::D) {
-            transform.translation.x += PLAYER_SPEED * time.delta_seconds();
-        }
-        if input.pressed(KeyCode::A) {
-            transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
-        }
-    }
-}
-
-fn on_resize_system(
-    mut resize_reader: EventReader<WindowResized>,
-    mut query: Query<&mut Transform, &Sprite>,
-) {
-    for e in resize_reader.iter() {
-        let height = e.height;
-        let half_height = height / 2.0;
-        for mut transform in query.iter_mut() {
-            transform.translation.y = -half_height + SPRITE_SHIFT;
-        }
-    }
-}
-
-fn check_borders(mut query: Query<&mut Transform, &Sprite>, windows: Query<&Window>) {
-    let window = windows.single();
-    let width = window.resolution.width();
-    let mut transform = query.single_mut();
-    println!("{}", transform.translation.x);
-    if transform.translation.x > width / 2.0 {
-        transform.translation.x = width / 2.0;
-    } else if transform.translation.x < -width / 2.0 {
-        transform.translation.x = -width / 2.0;
-    }
 }
