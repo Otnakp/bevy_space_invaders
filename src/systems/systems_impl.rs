@@ -1,19 +1,18 @@
-use bevy::prelude::*;
-
 use crate::systems::constants::*;
+use crate::systems::player::Player;
+use bevy::prelude::*;
 use bevy::window::WindowResized;
 pub fn player_movement(
-    mut characters: Query<(&mut Transform, &Sprite)>,
+    mut character: Query<(&mut Transform, &Sprite), With<Player>>,
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    for (mut transform, _) in &mut characters {
-        if input.pressed(KeyCode::D) {
-            transform.translation.x += PLAYER_SPEED * time.delta_seconds();
-        }
-        if input.pressed(KeyCode::A) {
-            transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
-        }
+    let (mut transform, _) = character.single_mut();
+    if input.pressed(KeyCode::D) {
+        transform.translation.x += PLAYER_SPEED * time.delta_seconds();
+    }
+    if input.pressed(KeyCode::A) {
+        transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
     }
 }
 
@@ -30,10 +29,14 @@ pub fn on_resize_system(
     }
 }
 
-pub fn check_borders(mut query: Query<&mut Transform, &Sprite>, windows: Query<&Window>) {
+pub fn check_borders(
+    mut query: Query<(&mut Transform, &Sprite), With<Player>>,
+    windows: Query<&Window>,
+) {
     let window = windows.single();
     let width = window.resolution.width();
-    let mut transform = query.single_mut();
+    let (mut transform, _sprite) = query.single_mut();
+
     if transform.translation.x > width / 2.0 {
         transform.translation.x = width / 2.0;
     } else if transform.translation.x < -width / 2.0 {
