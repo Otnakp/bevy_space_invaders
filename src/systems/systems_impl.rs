@@ -2,19 +2,6 @@ use crate::systems::constants::*;
 use crate::systems::player::Player;
 use bevy::prelude::*;
 use bevy::window::WindowResized;
-pub fn player_movement(
-    mut character: Query<(&mut Transform, &Sprite), With<Player>>,
-    input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-) {
-    let (mut transform, _) = character.single_mut();
-    if input.pressed(KeyCode::D) {
-        transform.translation.x += PLAYER_SPEED * time.delta_seconds();
-    }
-    if input.pressed(KeyCode::A) {
-        transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
-    }
-}
 
 pub fn on_resize_system(
     mut resize_reader: EventReader<WindowResized>,
