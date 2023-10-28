@@ -2,6 +2,10 @@ use bevy::prelude::*;
 
 use crate::systems::constants::*;
 use crate::systems::projectile::*;
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ShootTimer(pub Timer);
+
 #[derive(Component)]
 pub struct Player;
 
@@ -37,9 +41,17 @@ pub fn shoot(
     time: Res<Time>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut timer_query: Query<&mut ShootTimer>,
 ) {
-    if input.pressed(KeyCode::Space) {
-        let (mut transform, _) = character.single_mut();
+    let mut timer = timer_query.single_mut();
+    let mut finished = false;
+
+    if timer.tick(time.delta()).finished() {
+        finished = true;
+    }
+    if input.pressed(KeyCode::Space) && finished {
+        timer.reset();
+        let (transform, _) = character.single_mut();
         let shooting_pos = transform.translation;
         // destroy the eneml
         let texture = asset_server.load("projectile.png");
@@ -51,7 +63,11 @@ pub fn shoot(
                     ..default()
                 },
                 texture,
-                transform: Transform::from_xyz(shooting_pos.x, shooting_pos.y, 0.0),
+                transform: Transform::from_xyz(
+                    shooting_pos.x,
+                    shooting_pos.y + SPRITE_SIZE / 2.0,
+                    0.0,
+                ),
                 ..default()
             },
         });

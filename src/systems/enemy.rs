@@ -59,7 +59,7 @@ pub fn move_enemies(
 
     for (mut transform, _sprite) in query.iter_mut() {
         if transform.translation.y <= border {
-            println!("Game over");
+            // println!("Game over");
         }
         transform.translation.y -= ENEMY_SPEED * time.delta_seconds();
     }

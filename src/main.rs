@@ -35,6 +35,10 @@ fn setup(
     asset_server: Res<AssetServer>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    commands.spawn(ShootTimer(Timer::from_seconds(
+        SHOOT_TIMER,
+        TimerMode::Once,
+    )));
     commands.spawn(SpawnEnemyOnCompletionTimer(Timer::from_seconds(
         ENEMY_SPAWN_TIME,
         TimerMode::Repeating,
