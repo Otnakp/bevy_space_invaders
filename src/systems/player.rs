@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::transform::commands;
 
 use crate::systems::constants::*;
 use crate::systems::projectile::*;
@@ -45,13 +44,10 @@ pub fn check_collision(
     mut commands: Commands,
 ) {
     let mut to_despawn = Vec::new();
-    // using enemy size and projectile size you can understand if they are intersecting
     for (enemy_entity, enemy_transform, _) in enemies.iter_mut() {
         for (projectile_entity, projectile_transform, _) in projectiles.iter_mut() {
-            // Get the half sizes of enemy and projectile for easier calculations
             let half_enemy_size = ENEMY_SIZE / 2.0;
             let half_projectile_size = PROJECTILE_SIZE / 2.0;
-            // Calculate the boundaries of the enemy and projectile
             let enemy_left = enemy_transform.translation.x - half_enemy_size;
             let enemy_right = enemy_transform.translation.x + half_enemy_size;
             let enemy_top = enemy_transform.translation.y + half_enemy_size;
@@ -62,17 +58,10 @@ pub fn check_collision(
             let projectile_top = projectile_transform.translation.y + half_projectile_size;
             let projectile_bottom = projectile_transform.translation.y - half_projectile_size;
 
-            // Check for overlap
             let overlap_x = projectile_left < enemy_right && projectile_right > enemy_left;
             let overlap_y = projectile_top > enemy_bottom && projectile_bottom < enemy_top;
 
-            // If both x and y have overlap, then there's a collision
             if overlap_y && overlap_x {
-                println!("Hit");
-                // add to list the enemy and the projectile,
-                // despawn at the end of the two fors because i think otherwise it messes up
-                // the cycle
-
                 to_despawn.push(enemy_entity);
                 to_despawn.push(projectile_entity);
             }
@@ -101,7 +90,6 @@ pub fn shoot(
         timer.reset();
         let (transform, _) = character.single_mut();
         let shooting_pos = transform.translation;
-        // destroy the eneml
         let texture = asset_server.load("projectile.png");
         commands.spawn(ProjectileBundle {
             projectile: Projectile,
