@@ -27,6 +27,7 @@ fn main() {
         .add_systems(Update, (player_movement, on_resize_system, check_borders))
         .add_systems(Update, (shoot, move_projectile))
         .add_systems(Update, (spawn_enemy_when_completed, move_enemies))
+        .add_systems(Update, check_collision)
         .run();
 }
 

@@ -55,7 +55,7 @@ pub fn move_enemies(
     time: Res<Time>,
 ) {
     let window = windows.get_single().unwrap();
-    let border = -window.height() / 2.0 + SPRITE_SIZE;
+    let border = -window.height() / 2.0 + ENEMY_SIZE;
 
     for (mut transform, _sprite) in query.iter_mut() {
         if transform.translation.y <= border {
