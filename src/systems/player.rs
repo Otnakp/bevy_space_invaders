@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use bevy::utils::HashSet;
 
 use crate::systems::constants::*;
 use crate::systems::projectile::*;
 
 use super::enemy::Enemy;
+use bevy::window::PrimaryWindow;
 
 #[derive(Component, Deref, DerefMut)]
 pub struct ShootTimer(pub Timer);
@@ -42,8 +44,12 @@ pub fn check_collision(
     mut enemies: Query<(Entity, &mut Transform, &Sprite), (With<Enemy>, Without<Projectile>)>,
     mut projectiles: Query<(Entity, &mut Transform, &Sprite), (With<Projectile>, Without<Player>)>,
     mut commands: Commands,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let mut to_despawn = Vec::new();
+    let window = windows.get_single().unwrap();
+    let half_height = window.height() / 2.0;
+
+    let mut to_despawn = HashSet::new();
     for (enemy_entity, enemy_transform, _) in enemies.iter_mut() {
         for (projectile_entity, projectile_transform, _) in projectiles.iter_mut() {
             let half_enemy_size = ENEMY_SIZE / 2.0;
@@ -62,8 +68,11 @@ pub fn check_collision(
             let overlap_y = projectile_top > enemy_bottom && projectile_bottom < enemy_top;
 
             if overlap_y && overlap_x {
-                to_despawn.push(enemy_entity);
-                to_despawn.push(projectile_entity);
+                to_despawn.insert(enemy_entity);
+                to_despawn.insert(projectile_entity);
+            }
+            if projectile_bottom > half_height {
+                to_despawn.insert(projectile_entity);
             }
         }
     }

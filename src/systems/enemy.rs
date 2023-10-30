@@ -49,17 +49,18 @@ pub fn spawn_enemy_when_completed(
         }
     }
 }
+
 pub fn move_enemies(
     mut query: Query<(&mut Transform, &Sprite), With<Enemy>>,
     windows: Query<&Window>,
     time: Res<Time>,
 ) {
     let window = windows.get_single().unwrap();
-    let border = -window.height() / 2.0 + ENEMY_SIZE;
+    let border = -window.height() / 2.0 + SPRITE_SIZE + SPRITE_SHIFT;
 
     for (mut transform, _sprite) in query.iter_mut() {
         if transform.translation.y <= border {
-            // println!("Game over");
+            std::process::exit(0);
         }
         transform.translation.y -= ENEMY_SPEED * time.delta_seconds();
     }
