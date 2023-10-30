@@ -1,2 +1,2 @@
-# bevy_game
-Simple bevy game: space invaders
+# Bevy Space Invaders
+Bevy space invaders is a simple implementation of space invaders in bevy.
