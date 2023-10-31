@@ -5,6 +5,7 @@ use systems::constants::*;
 use systems::enemy::*;
 use systems::player::*;
 use systems::systems_impl::*;
+use systems::text::*;
 fn main() {
     App::new()
         .add_plugins(
@@ -44,6 +45,29 @@ fn setup(
         ENEMY_SPAWN_TIME,
         TimerMode::Repeating,
     )));
+
+    commands.spawn((
+        // Create a TextBundle that has a Text with a single section.
+        TextBundle::from_section(
+            // Accepts a `String` or any type that converts into a `String`, such as `&str`
+            "0",
+            TextStyle {
+                // This font is loaded and will be used instead of the default font.
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 100.0,
+                color: Color::WHITE,
+            },
+        ) // Set the alignment of the Text
+        .with_text_alignment(TextAlignment::Center)
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(5.0), // Adjusted this line
+            right: Val::Px(15.0),
+            ..Default::default() // Note: Rust convention is to use Default::default() instead of default()
+        }),
+        PointText,
+    ));
+
     commands.spawn(Camera2dBundle::default());
     let window = windows.get_single().unwrap();
     let half_height = window.height() / 2.0;

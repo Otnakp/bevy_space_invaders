@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use bevy::utils::HashSet;
+use bevy::utils::HashMap;
 
 use crate::systems::constants::*;
 use crate::systems::projectile::*;
+use crate::systems::text::*;
 
 use super::enemy::Enemy;
 use bevy::window::PrimaryWindow;
@@ -45,11 +46,12 @@ pub fn check_collision(
     mut projectiles: Query<(Entity, &mut Transform, &Sprite), (With<Projectile>, Without<Player>)>,
     mut commands: Commands,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut texts: Query<&mut Text, With<PointText>>,
 ) {
     let window = windows.get_single().unwrap();
     let half_height = window.height() / 2.0;
 
-    let mut to_despawn = HashSet::new();
+    let mut to_despawn = HashMap::new();
     for (enemy_entity, enemy_transform, _) in enemies.iter_mut() {
         for (projectile_entity, projectile_transform, _) in projectiles.iter_mut() {
             let half_enemy_size = ENEMY_SIZE / 2.0;
@@ -68,16 +70,26 @@ pub fn check_collision(
             let overlap_y = projectile_top > enemy_bottom && projectile_bottom < enemy_top;
 
             if overlap_y && overlap_x {
-                to_despawn.insert(enemy_entity);
-                to_despawn.insert(projectile_entity);
+                to_despawn.insert(enemy_entity, "Kill");
+                to_despawn.insert(projectile_entity, "Projectile");
             }
             if projectile_bottom > half_height {
-                to_despawn.insert(projectile_entity);
+                to_despawn.insert(projectile_entity, "Projectile");
             }
         }
     }
-    for entity in to_despawn {
+    let mut text = texts.single_mut();
+    let n = &text.sections[0].value;
+    let mut n: i32 = n.parse().unwrap();
+    for (entity, type_kill) in to_despawn.into_iter() {
         commands.entity(entity).despawn();
+        //match entity {
+
+        //}
+        if type_kill == "Kill" {
+            n += 1;
+            text.sections[0].value = n.to_string();
+        }
     }
 }
 
